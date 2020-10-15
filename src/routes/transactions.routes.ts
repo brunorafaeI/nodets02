@@ -5,12 +5,8 @@ import { getCustomRepository } from 'typeorm';
 import CreateCategoryService from '../services/CreateCategoryService';
 import CreateTransactionService from '../services/CreateTransactionService';
 import TransactionRepository from '../repositories/TransactionRepository';
-import AppError from '../errors/AppError';
 import DeleteTransactionService from '../services/DeleteTransactionService';
 import ImportTransactionsService from '../services/ImportTransactionsService';
-
-// import DeleteTransactionService from '../services/DeleteTransactionService';
-// import ImportTransactionsService from '../services/ImportTransactionsService';
 
 const transactionsRouter = Router();
 const upload = multer();
@@ -19,9 +15,10 @@ transactionsRouter.get('/', async (request, response) => {
   const transactionRepository = getCustomRepository(TransactionRepository);
 
   const transactions = await transactionRepository.find({
-    select: ['id', 'title', 'value', 'type'],
+    select: ['id', 'title', 'value', 'type', 'created_at'],
     relations: ['category'],
   });
+
   const balance = await transactionRepository.getBalance();
 
   return response.json({ transactions, balance });

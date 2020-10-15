@@ -23,12 +23,12 @@ class Transaction {
   @Column({ type: 'double precision', precision: 15, scale: 2, default: 0 })
   value: number;
 
-  @Column({ select: false })
-  category_id: string;
-
   @ManyToOne(() => Category, category => category.transaction, { eager: true })
   @JoinColumn({ name: 'category_id' })
   category: Category;
+
+  @Column({ select: false })
+  category_id: string;
 
   @CreateDateColumn()
   created_at: Date;

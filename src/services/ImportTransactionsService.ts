@@ -17,7 +17,8 @@ interface TransactionCSV {
 
 class ImportTransactionsService {
   async execute(buffer: Buffer, mimetype: string): Promise<Transaction[]> {
-    if (mimetype !== 'text/csv') {
+    const list_format = ['text/csv', 'application/vnd.ms-excel'];
+    if (list_format.indexOf(mimetype) === -1) {
       throw new AppError('The format file is not valid, allows only: csv');
     }
     const transactionService = new CreateTransactionService();
@@ -32,14 +33,15 @@ class ImportTransactionsService {
     const transactions: Array<Transaction> = [];
     const arrayCSV: Array<TransactionCSV> = [];
 
-    parsedCSV
-      .on('data', line => {
-        const [title, type, value, category] = line;
-        arrayCSV.push({ title, type, value, category });
-      })
-      .on('error', err => err);
-
-    await new Promise(resolve => parsedCSV.on('end', resolve));
+    await new Promise((resolve, reject) => {
+      parsedCSV
+        .on('data', line => {
+          const [title, type, value, category] = line;
+          arrayCSV.push({ title, type, value, category });
+        })
+        .on('error', err => reject(err))
+        .on('end', resolve);
+    });
 
     if (arrayCSV.length) {
       // eslint-disable-next-line no-plusplus
